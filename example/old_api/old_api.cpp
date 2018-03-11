@@ -64,7 +64,7 @@ private:
 
 int count_threads = 0;
 
-struct stack_test
+struct stack_test : rl::test_suite<stack_test, 4>
 {
     stack s_;
 
@@ -95,37 +95,8 @@ struct stack_test
     }
 };
 
-
-
-
-int main(int argc, char **argv)
+int main()
 {
-    if (argc != 2)
-    {
-        std::cerr << "Wrong number of arguments" << std::endl;
-        return EINVAL;
-    }
-
-    try
-    {
-        count_threads = std::atoi(argv[1]);
-        if (count_threads <= 0)
-        {
-            std::cerr << "The number of threads must be a positive number" << std::endl;
-            return EINVAL;
-        }
-
-        rl::test_params p;
-        p.static_thread_count = count_threads;
-        rl::simulate<stack_test>(p);
-    }
-    catch(std::exception const & e)
-    {
-        (void)e;
-        std::cerr << "Wrong argument. The number of threads must be a number" << std::endl;
-        return EINVAL;
-    }
-
-    return 0;
+	rl::simulate<stack_test>();
 }
 
