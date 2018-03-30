@@ -75,7 +75,6 @@ public:
 
                 snapshots.resize(split);
 
-
                 current_snapshot.start();
             }
 
@@ -89,8 +88,6 @@ public:
 
             is_finish_ = false;
         }
-
-        std::cout << "start " << this->iter_ << std::endl;
     }
 
     thread_id_t iteration_begin_impl()
@@ -109,7 +106,6 @@ public:
     thread_id_t schedule_impl(unpark_reason& reason, unsigned /*yield*/)
     {
         rl::snapshot_slave::make_snapshot(5001, 0, incrementor_functor<iteration_t>(this->iter_, rand_));
-        std::cout << "impl = " << this->iter_ << std::endl;
 
         thread_id_t const running_thread_count = this->running_threads_count;
 
