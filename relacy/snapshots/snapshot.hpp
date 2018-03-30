@@ -30,27 +30,27 @@ public:
     {
     }
 
-    uint64_t get_id()
+    uint64_t get_id() const
     {
         return id_;
     }
 
-    pid_t get_pid()
+    pid_t get_pid() const
     {
         return pid_;
     }
 
-    int get_socket()
+    int get_socket() const
     {
         return socket_;
     }
 
-    bool is_finish()
+    bool is_finish() const
     {
         return is_finish_;
     }
 
-    void stop()
+    void stop() const
     {
         snapshot_event event = snapshot_event_stop;
         strong_write(socket_, reinterpret_cast<char*>(&event), sizeof(event));
@@ -58,7 +58,7 @@ public:
         waitpid(pid_, &status, WUNTRACED | WCONTINUED);
     }
 
-    void start()
+    void start() const
     {
         snapshot_event event = snapshot_event_start;
         strong_write(socket_, reinterpret_cast<char*>(&event), sizeof(event));

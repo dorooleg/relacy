@@ -33,6 +33,7 @@
 #include "schedulers/random_scheduler.hpp"
 #include "schedulers/full_search_scheduler.hpp"
 #include "schedulers/context_bound_scheduler.hpp"
+#include "schedulers/random_snapshots_scheduler.hpp"
 
 namespace rl
 {
@@ -967,6 +968,8 @@ bool simulate(test_params& params, thread_id_t thread_count)
         res = run_test<test_t, full_search_scheduler>(params, oss, false, thread_count);
     else if (fair_context_bound_scheduler_type == params.search_type)
         res = run_test<test_t, context_bound_scheduler>(params, oss, false, thread_count);
+    else if (random_snapshots_scheduler_type == params.search_type)
+        res = run_test<test_t, random_snapshots_scheduler>(params, oss, false, thread_count);
     else
         RL_VERIFY(false);
 
@@ -996,6 +999,8 @@ bool simulate(test_params& params, thread_id_t thread_count)
             res2 = run_test<test_t, full_search_scheduler>(params, oss2, true, thread_count);
         else if (fair_context_bound_scheduler_type == params.search_type)
             res2 = run_test<test_t, context_bound_scheduler>(params, oss2, true, thread_count);
+        else if (random_snapshots_scheduler_type == params.search_type)
+            res = run_test<test_t, random_snapshots_scheduler>(params, oss2, false, thread_count);
         else
             RL_VERIFY(false);
 

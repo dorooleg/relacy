@@ -35,7 +35,7 @@ public:
         {
             pid_t pid = fork();
 
-            if (pid != 0)
+            if (pid == 0)
             {
                 int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
                 struct hostent *server = gethostbyname("localhost");
@@ -56,6 +56,8 @@ public:
                 snapshot_event event = snapshot_event_start;
                 strong_read(socket_fd, reinterpret_cast<char*>(&event), sizeof(event));
 
+                close(socket_fd);
+
                 if (event == snapshot_event_stop)
                 {
                     exit(0);
@@ -65,6 +67,11 @@ public:
             }
             else
             {
+                if (finish)
+                {
+                    exit(0);
+                }
+
                 break;
             }
         }

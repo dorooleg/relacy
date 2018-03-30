@@ -79,6 +79,11 @@ public:
         return pid;
     }
 
+    ~snapshot_master()
+    {
+        close(socket_fd_);
+    }
+
 private:
     const unsigned short port_;
     int socket_fd_;

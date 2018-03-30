@@ -26,11 +26,13 @@ enum scheduler_type_e
     sched_bound,
     sched_full,
     sched_count,
+    sched_random_snapshots,
 
     random_scheduler_type = sched_random,
     fair_context_bound_scheduler_type = sched_bound,
     fair_full_search_scheduler_type = sched_full,
-    scheduler_type_count
+    scheduler_type_count = sched_count,
+    random_snapshots_scheduler_type = sched_random_snapshots
 };
 
 inline char const* format(scheduler_type_e t)
