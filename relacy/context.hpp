@@ -627,11 +627,11 @@ public:
 
             if (test_result_success != test_result_)
             {
-                std::cout << "Find probleb!!!" << std::endl;
                 params_.test_result = test_result_;
                 params_.stop_iteration = current_iter_;
                 if (params_.collect_history)
                     output_history();
+                rl::snapshot_slave::make_snapshot(5001, 0, false, true);
                 return test_result_;
             }
 

@@ -18,15 +18,17 @@ public:
         , pid_(0)
         , socket_(0)
         , is_finish_(true)
+        , is_stop_(false)
     {
 
     }
 
-    snapshot(uint64_t id, int pid, int socket, bool is_finish)
+    snapshot(uint64_t id, int pid, int socket, bool is_finish, bool is_stop = false)
         : id_(id)
         , pid_(pid)
         , socket_(socket)
         , is_finish_(is_finish)
+        , is_stop_(is_stop)
     {
     }
 
@@ -50,12 +52,17 @@ public:
         return is_finish_;
     }
 
+    bool is_stop() const
+    {
+        return is_stop_;
+    }
+
     void stop() const
     {
         snapshot_event event = snapshot_event_stop;
         strong_write(socket_, reinterpret_cast<char*>(&event), sizeof(event));
         int status;
-        waitpid(pid_, &status, WUNTRACED | WCONTINUED);
+        waitpid(pid_, &status, WCONTINUED | WNOHANG | WUNTRACED);
         close(socket_);
     }
 
@@ -64,15 +71,16 @@ public:
         snapshot_event event = snapshot_event_start;
         strong_write(socket_, reinterpret_cast<char*>(&event), sizeof(event));
         int status;
-        waitpid(pid_, &status, WUNTRACED | WCONTINUED);
+        waitpid(pid_, &status, WCONTINUED | WNOHANG | WUNTRACED);
         close(socket_);
     }
 
 private:
     uint64_t id_;
-    int pid_;
-    int socket_;
-    bool is_finish_;
+    int      pid_;
+    int      socket_;
+    bool     is_finish_;
+    bool     is_stop_;
 };
 
 }

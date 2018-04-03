@@ -29,21 +29,19 @@ private:
     class incrementor_functor
     {
     public:
-        incrementor_functor(T& value, random_generator& rand)
+        incrementor_functor(T& value)
             : value_(value)
-            , rand_(rand)
         {
         }
 
         void operator()()
         {
             ++value_;
-            rand_.seed(value_);
+            srand(time(NULL));
         }
 
     private:
         T& value_;
-        random_generator& rand_;
     };
 
 public:
@@ -59,12 +57,23 @@ public:
             for (iteration_t i = 1; i < this->params_.iteration_count; i++)
             {
                 snapshots.push_back(master.wait_snapshot());
-                while (!snapshots.back().is_finish())
+                while (!snapshots.back().is_finish() && !snapshots.back().is_stop())
                 {
                     snapshots.push_back(master.wait_snapshot());
                 }
 
-                unsigned split = rand_.rand() % snapshots.size();
+                if (snapshots.back().is_stop())
+                {
+                    std::vector<snapshot>::iterator last = --snapshots.end();
+                    for (std::vector<snapshot>::iterator it = snapshots.begin(); it != last; ++it)
+                    {
+                        it->stop();
+                    }
+                    snapshots.back().start();
+                    exit(0);
+                }
+
+                unsigned split = ::rand() % snapshots.size();
 
                 if (split > 0 && split + 1 == snapshots.size())
                 {
@@ -89,7 +98,7 @@ public:
             }
 
             this->iter_ = this->params_.iteration_count == 0 ? 0 : this->params_.iteration_count - 1;
-            rand_.seed(this->iter_);
+            srand(time(NULL));
 
             is_finish_ = false;
 
@@ -99,7 +108,7 @@ public:
 
     thread_id_t iteration_begin_impl()
     {
-        rand_.seed(this->iter_);
+        srand(time(NULL));
         unpark_reason reason;
         return schedule_impl(reason, false);
     }
@@ -111,7 +120,7 @@ public:
 
     thread_id_t schedule_impl(unpark_reason& reason, unsigned /*yield*/)
     {
-        rl::snapshot_slave::make_snapshot(5001, 0, incrementor_functor<iteration_t>(this->iter_, rand_));
+        rl::snapshot_slave::make_snapshot(5001, 0, incrementor_functor<iteration_t>(this->iter_));
 
         thread_id_t const running_thread_count = this->running_threads_count;
 
@@ -119,7 +128,7 @@ public:
         if (timed_thread_count)
         {
             thread_id_t cnt = running_thread_count ? timed_thread_count * 4 : timed_thread_count;
-            thread_id_t idx = rand_.rand() % cnt;
+            thread_id_t idx = ::rand() % cnt;
             if (idx < timed_thread_count)
             {
                 thread_info_t* thr = this->timed_threads_[idx];
@@ -136,7 +145,7 @@ public:
         if (spurious_thread_count && running_thread_count)
         {
             thread_id_t cnt = spurious_thread_count * 8;
-            thread_id_t idx = rand_.rand() % cnt;
+            thread_id_t idx = ::rand() % cnt;
             if (idx < spurious_thread_count)
             {
                 thread_info_t* thr = this->spurious_threads_[idx];
@@ -150,7 +159,7 @@ public:
         }
 
         RL_VERIFY(running_thread_count);
-        unsigned index = rand_.rand() % running_thread_count;
+        unsigned index = ::rand() % running_thread_count;
         thread_id_t th = this->running_threads[index];
         reason = unpark_reason_normal;
         return th;
@@ -159,7 +168,7 @@ public:
     unsigned rand_impl(unsigned limit, sched_type t)
     {
         (void)t;
-        return rand_.rand() % limit;
+        return ::rand() % limit;
     }
 
     iteration_t iteration_count_impl()
@@ -180,7 +189,6 @@ public:
     }
 
 private:
-    random_generator rand_;
     bool is_finish_;
 
     RL_NOCOPY(random_snapshots_scheduler);

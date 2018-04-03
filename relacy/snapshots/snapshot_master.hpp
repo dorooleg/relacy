@@ -63,7 +63,10 @@ public:
         bool is_end = false;
         strong_read(socket_client_fd, reinterpret_cast<char*>(&is_end), sizeof(is_end));
 
-        return snapshot(id, pid, socket_client_fd, is_end);
+        bool is_stop = false;
+        strong_read(socket_client_fd, reinterpret_cast<char*>(&is_stop), sizeof(is_stop));
+
+        return snapshot(id, pid, socket_client_fd, is_end, is_stop);
     }
 
 

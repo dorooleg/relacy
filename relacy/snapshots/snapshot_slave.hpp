@@ -23,20 +23,21 @@ private:
     };
 
 public:
-    static void make_snapshot(unsigned int port, uint64_t id, bool finish = false)
+    static void make_snapshot(unsigned int port, uint64_t id, bool finish = false, bool stop = false)
     {
-        make_snapshot(port, id, empty_functor(), finish);
+        make_snapshot(port, id, empty_functor(), finish, stop);
     }
 
     template<typename T>
-    static void make_snapshot(unsigned int port, uint64_t id, T functor, bool finish = false)
+    static void make_snapshot(unsigned int port, uint64_t id, T functor, bool finish = false, bool stop = false)
     {
         while (true)
         {
-            pid_t pid = fork();
+            pid_t pid = !stop ? fork() : 0;
 
             if (pid == 0)
             {
+
                 int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
                 struct hostent *server = gethostbyname("localhost");
                 struct sockaddr_in server_addr = {};
@@ -52,6 +53,7 @@ public:
                 strong_write(socket_fd, reinterpret_cast<char*>(&id), sizeof(id));
                 strong_write(socket_fd, reinterpret_cast<char*>(&pid), sizeof(pid));
                 strong_write(socket_fd, reinterpret_cast<char*>(&finish), sizeof(finish));
+                strong_write(socket_fd, reinterpret_cast<char*>(&stop), sizeof(stop));
 
                 snapshot_event event = snapshot_event_start;
                 strong_read(socket_fd, reinterpret_cast<char*>(&event), sizeof(event));
@@ -64,6 +66,11 @@ public:
                 }
 
                 functor();
+
+                if (stop)
+                {
+                    break;
+                }
             }
             else
             {
