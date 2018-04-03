@@ -64,7 +64,12 @@ public:
                     snapshots.push_back(master.wait_snapshot());
                 }
 
-                int split = rand_.rand() % snapshots.size();
+                unsigned split = rand_.rand() % snapshots.size();
+
+                if (split > 0 && split + 1 == snapshots.size())
+                {
+                    --split;
+                }
 
                 snapshot current_snapshot = snapshots[split];
 
@@ -87,6 +92,8 @@ public:
             rand_.seed(this->iter_);
 
             is_finish_ = false;
+
+            std::cout << "start " << this->params_.iteration_count << std::endl;
         }
     }
 
@@ -99,7 +106,6 @@ public:
 
     bool iteration_end_impl()
     {
-        rl::snapshot_slave::make_snapshot(5001, 0, is_finish_);
         return !is_finish_ || this->iter_ == this->params_.iteration_count;
     }
 

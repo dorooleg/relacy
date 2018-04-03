@@ -87,11 +87,17 @@ struct stack_test
 
     void thread(unsigned /*index*/)
     {
+        std::cout << -2 << std::endl;
         s_.push(rand() + 1);
+        std::cout << -1 << std::endl;
         produced_count_ += 1;
+        std::cout << 0 << std::endl;
         int data = s_.pop();
+        std::cout << 1 << std::endl;
         RL_ASSERT(data);
+        std::cout << 2 << std::endl;
         consumed_count_ += 1;
+        std::cout << "thread end" << std::endl;
     }
 };
 
@@ -114,10 +120,6 @@ int main(int argc, char **argv)
             std::cerr << "The number of threads must be a positive number" << std::endl;
             return EINVAL;
         }
-
-        rl::test_params p;
-        p.static_thread_count = count_threads;
-        rl::simulate<stack_test>(p);
     }
     catch(std::exception const & e)
     {
@@ -125,6 +127,11 @@ int main(int argc, char **argv)
         std::cerr << "Wrong argument. The number of threads must be a number" << std::endl;
         return EINVAL;
     }
+
+    rl::test_params p;
+    p.static_thread_count = count_threads;
+    p.search_type = rl::sched_random_snapshots;
+    rl::simulate<stack_test>(p);
 
     return 0;
 }

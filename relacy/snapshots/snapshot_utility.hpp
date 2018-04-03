@@ -2,6 +2,11 @@
 #define RL_SNAPSHOT_UTILITY_HPP
 
 #include <cstdlib>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <errno.h>
+
 
 namespace rl
 {
@@ -37,6 +42,23 @@ static inline void strong_read(int socket, char *data, size_t nbytes)
         nbytes -= n;
     }
 }
+
+static inline int get_count_open_descriptors()
+{
+    struct stat stats;
+    int max_fd_number = getdtablesize();
+    int fd_counter = 0;
+    for (int i = 0; i <= max_fd_number; i++)
+    {
+        fstat(i, &stats);
+        if (errno != EBADF)
+        {
+            fd_counter++;
+        }
+    }
+    return fd_counter;
+}
+
 
 }
 

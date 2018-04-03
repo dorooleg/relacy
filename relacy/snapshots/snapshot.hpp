@@ -56,6 +56,7 @@ public:
         strong_write(socket_, reinterpret_cast<char*>(&event), sizeof(event));
         int status;
         waitpid(pid_, &status, WUNTRACED | WCONTINUED);
+        close(socket_);
     }
 
     void start() const
@@ -64,6 +65,7 @@ public:
         strong_write(socket_, reinterpret_cast<char*>(&event), sizeof(event));
         int status;
         waitpid(pid_, &status, WUNTRACED | WCONTINUED);
+        close(socket_);
     }
 
 private:

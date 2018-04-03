@@ -34,6 +34,7 @@
 #include "schedulers/full_search_scheduler.hpp"
 #include "schedulers/context_bound_scheduler.hpp"
 #include "schedulers/random_snapshots_scheduler.hpp"
+#include "snapshots/snapshot_slave.hpp"
 
 namespace rl
 {
@@ -626,6 +627,7 @@ public:
 
             if (test_result_success != test_result_)
             {
+                std::cout << "Find probleb!!!" << std::endl;
                 params_.test_result = test_result_;
                 params_.stop_iteration = current_iter_;
                 if (params_.collect_history)
@@ -642,8 +644,16 @@ public:
 
             RL_HIST_CTX(user_event) {"ITERATION END"} RL_HIST_END();
 
+
+
             if (sched_.iteration_end())
                 break;
+
+            // It is not a clean solution
+            if (params_.search_type == sched_random_snapshots)
+            {
+                rl::snapshot_slave::make_snapshot(5001, 0, true);
+            }
         }
 
         params_.test_result = test_result_success;
